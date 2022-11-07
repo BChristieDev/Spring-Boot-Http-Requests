@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<style>
+			td,
+			th,
+			table {
+				border: thin solid black;
+				border-collapse: collapse;
+				background-color: #eee;
+			}
+		</style>
+	</head>
+
+	<body>
+		<a href="http://localhost:8080/api/data">GET Data</a>
+
+		<button id="getData">Get Data</button>
+		<button id="getDataById">Get Data By Id</button>
+		<button id="postData">Post Data</button>
+		<button id="putData">Put Data</button>
+		<button id="deleteData">Delete Data</button>
+
+		<h1 id="requestType"></h1>
+		<table>
+			<tr>
+				<td>Status</td>
+				<td id="status"></td>
+			</tr>
+			<tr>
+				<td>Response Body</td>
+				<td id="body"></td>
+			</tr>
+		</table>
+		<div id="divResponseBody"></div>
+		<div id="divResponseStatus"></div>
+
+		<script>
+			var divResponseBody = document.getElementById("body")
+			var divResponseStatus = document.getElementById("status")
+			var requestType = document.getElementById("requestType")
+
+			window.onload = () => {
+				document.getElementById("getData").onclick = getData
+				document.getElementById("getDataById").onclick = getDataById
+				document.getElementById("postData").onclick = postData
+				document.getElementById("putData").onclick = putData
+				document.getElementById("deleteData").onclick = deleteData
+			}
+
+			function getData() {
+				let url = "http://localhost:8080/api/data"
+
+				requestType.innerText = "GET " + url
+
+				fetch(url)
+					.then((response) => {
+						divResponseStatus.innerText = response.status
+
+						return response.json()
+					})
+					.then((json) => {
+						divResponseBody.innerText = JSON.stringify(json)
+					})
+					.catch((error) => alert(error))
+			}
+
+			function getDataById() {
+				let url = "http://localhost:8080/api/data/5"
+
+				requestType.innerText = "GET " + url
+
+				fetch(url)
+					.then((response) => {
+						divResponseStatus.innerText = response.status
+
+						if (response.status != 404) {
+							return response.json()
+						}
+					})
+					.then((json) => {
+						if (json) {
+							divResponseBody.innerText = JSON.stringify(json)
+						} else {
+							divResponseBody.innerText = ""
+						}
+					})
+					.catch((error) => alert(error))
+			}
+
+			function postData() {
+				let url = "http://localhost:8080/api/data"
+
+				requestType.innerText = "POST " + url
+
+				let postInfo = {
+					method: "POST",
+					body: JSON.stringify({ data: " This data was posted by client" }),
+					headers: { "Content-type": "application/json" },
+				}
+
+				fetch(url, postInfo)
+					.then((response) => {
+						divResponseStatus.innerText = response.status
+						return response.text()
+					})
+					.then((text) => (divResponseBody.innerText = text))
+					.catch((error) => alert(error))
+			}
+
+			function putData() {
+				url = "http://localhost:8080/api/data/5"
+
+				requestType.innerText = "PUT " + url
+
+				let putInfo = {
+					method: "PUT",
+					body: JSON.stringify({ data: " This data was updated by client" }),
+					headers: { "Content-type": "application/json" },
+				}
+
+				fetch(url, putInfo)
+					.then((response) => {
+						divResponseStatus.innerText = response.status
+
+						if (response.status == 404) {
+							divResponseBody.innerText = "Cannot perform update"
+						} else {
+							divResponseBody.innerText = ""
+						}
+					})
+					.catch((error) => alert(error))
+			}
+
+			function deleteData() {
+				url = "http://localhost:8080/api/data/5"
+
+				requestType.innerText = "DELETE " + url
+
+				let deleteInfo = {
+					method: "DELETE",
+					headers: { "Content-type": "application/json" },
+				}
+
+				fetch(url, deleteInfo)
+					.then((response) => {
+						divResponseStatus.innerText = response.status
+
+						if (response.status == 404) {
+							divResponseBody.innerText = "Cannot perform delete"
+						} else {
+							divResponseBody.innerText = ""
+						}
+
+						response.json()
+					})
+					.catch((error) => alert(error))
+			}
+		</script>
+	</body>
+</html>
